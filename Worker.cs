@@ -62,6 +62,7 @@ $"""
 			}
 
 			Console.WriteLine("Finished checking.");
+			Environment.Exit(0);
 		}
 	}
 }
