@@ -2,7 +2,7 @@ name: Tazkarti Notifier
 
 on:
   schedule:
-    - cron: "*/1 * * * *" # كل دقيقة
+    - cron: '*/5 * * * *'
 
   workflow_dispatch:
 
