@@ -1,4 +1,4 @@
-using WorkerService1.Services;
+﻿using WorkerService1.Services;
 
 namespace WorkerService1
 {
@@ -15,7 +15,9 @@ namespace WorkerService1
 		{
 			var matchService = new MatchService();
 			var telegramService = new TelegramService();
-
+			await telegramService.SendMessage(
+		"🔥 GitHub Action Started"
+	);
 			try
 			{
 				Console.WriteLine("=================================");
