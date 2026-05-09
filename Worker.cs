@@ -16,63 +16,52 @@ namespace WorkerService1
 			var matchService = new MatchService();
 			var telegramService = new TelegramService();
 
-			HashSet<int> sentMatches = new();
-			await telegramService.SendMessage("?? Bot Started Successfully");
-			while (!stoppingToken.IsCancellationRequested)
+			try
 			{
-				try
+				Console.WriteLine("=================================");
+				Console.WriteLine($"Checking matches: {DateTime.Now}");
+
+				var matches = await matchService.GetMatchesAsync();
+
+				Console.WriteLine($"Matches Count: {matches.Count}");
+
+				foreach (var match in matches)
 				{
-					Console.WriteLine("=================================");
-					Console.WriteLine($"Checking matches: {DateTime.Now}");
+					Console.WriteLine($"{match.Team1} vs {match.Team2}");
 
-					var matches = await matchService.GetMatchesAsync();
+					bool isZamalek =
+						match.Team1.Contains("Zamalek", StringComparison.OrdinalIgnoreCase)
+						|| match.Team2.Contains("Zamalek", StringComparison.OrdinalIgnoreCase);
 
-					Console.WriteLine($"Matches Count: {matches.Count}");
-
-					foreach (var match in matches)
+					if (isZamalek)
 					{
-						Console.WriteLine($"{match.Team1} vs {match.Team2}");
+						Console.WriteLine("?? Zamalek Match Found!");
 
-						bool isZamalek =
-							match.Team1.Contains("Zamalek", StringComparison.OrdinalIgnoreCase)
-							|| match.Team2.Contains("Zamalek", StringComparison.OrdinalIgnoreCase);
+						var msg =
+$"""
+?? Zamalek Match Found
 
-						if (isZamalek)
-						{
-							Console.WriteLine("?? Zamalek Match Found!");
+? {match.Team1Ar} vs {match.Team2Ar}
 
-							if (!sentMatches.Contains(match.MatchId))
-							{
-								var msg =
-											$"""
-								?? New Match Alert
+?? Stadium: {match.Stadium}
 
-								? {match.Team1Ar} vs {match.Team2Ar}
+?? Kickoff: {match.KickOffTime}
 
-								?? {match.Stadium}
+?? https://www.tazkarti.com/#/matches
+""";
 
-								?? {match.KickOffTime}
+						await telegramService.SendMessage(msg);
 
-								?? https://www.tazkarti.com/#/matches
-								""";
-
-								await telegramService.SendMessage(msg);
-
-								Console.WriteLine("? Telegram Message Sent");
-
-								sentMatches.Add(match.MatchId);
-							}
-						}
+						Console.WriteLine("? Telegram Message Sent");
 					}
 				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"? ERROR: {ex.Message}");
-				}
-
-				Console.WriteLine("? Waiting 30 seconds...");
-				await Task.Delay(30000, stoppingToken);
 			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"? ERROR: {ex.Message}");
+			}
+
+			Console.WriteLine("Finished checking.");
 		}
 	}
 }
