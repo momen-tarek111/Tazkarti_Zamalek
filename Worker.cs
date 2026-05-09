@@ -22,7 +22,9 @@ namespace WorkerService1
 				Console.WriteLine($"Checking matches: {DateTime.Now}");
 
 				var matches = await matchService.GetMatchesAsync();
-
+				await telegramService.SendMessage(
+					$"? Bot checked website\nMatches Count: {matches.Count}\nTime: {DateTime.Now}"
+				);
 				Console.WriteLine($"Matches Count: {matches.Count}");
 
 				foreach (var match in matches)
