@@ -24,22 +24,14 @@ public class Worker : BackgroundService
 				Console.WriteLine($"Checking matches: {DateTime.Now}");
 
 				var matches = await matchService.GetMatchesAsync();
-				await telegramService.SendMessage(
-	$"✅ Bot Running\n⏰ {DateTime.Now}\n📊 Matches Count: {matches.Count}"
-);
-				Console.WriteLine($"Matches Count: {matches.Count}");
-
 				foreach (var match in matches)
 				{
-					Console.WriteLine($"{match.Team1} vs {match.Team2}");
-
 					bool isZamalek =
 						match.Team1.Contains("Zamalek", StringComparison.OrdinalIgnoreCase)
 						|| match.Team2.Contains("Zamalek", StringComparison.OrdinalIgnoreCase);
 
 					if (isZamalek)
 					{
-						Console.WriteLine("🔥 Zamalek Match Found!");
 
 						if (!sentMatches.Contains(match.MatchId))
 						{
@@ -58,8 +50,6 @@ public class Worker : BackgroundService
 
 							await telegramService.SendMessage(msg);
 
-							Console.WriteLine("✅ Telegram Message Sent");
-
 							sentMatches.Add(match.MatchId);
 						}
 					}
@@ -70,7 +60,6 @@ public class Worker : BackgroundService
 				Console.WriteLine($"❌ ERROR: {ex.Message}");
 			}
 
-			Console.WriteLine("⏳ Waiting 30 seconds...");
 			await Task.Delay(30000, stoppingToken);
 		}
 	}
