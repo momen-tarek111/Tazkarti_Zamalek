@@ -24,7 +24,9 @@ public class Worker : BackgroundService
 				Console.WriteLine($"Checking matches: {DateTime.Now}");
 
 				var matches = await matchService.GetMatchesAsync();
-
+				await telegramService.SendMessage(
+	$"✅ Bot Running\n⏰ {DateTime.Now}\n📊 Matches Count: {matches.Count}"
+);
 				Console.WriteLine($"Matches Count: {matches.Count}");
 
 				foreach (var match in matches)
@@ -42,17 +44,17 @@ public class Worker : BackgroundService
 						if (!sentMatches.Contains(match.MatchId))
 						{
 							var msg =
-		$"""
-🚨 New Match Alert
+									$"""
+							🚨 New Match Alert
 
-⚽ {match.Team1Ar} vs {match.Team2Ar}
+							⚽ {match.Team1Ar} vs {match.Team2Ar}
 
-🏟 {match.Stadium}
+							🏟 {match.Stadium}
 
-🕒 {match.KickOffTime}
+							🕒 {match.KickOffTime}
 
-🔗 https://www.tazkarti.com/#/matches
-""";
+							🔗 https://www.tazkarti.com/#/matches
+							""";
 
 							await telegramService.SendMessage(msg);
 
