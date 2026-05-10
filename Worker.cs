@@ -1,32 +1,30 @@
 ﻿using WorkerService1.Services;
 
-namespace WorkerService1
+public class Worker : BackgroundService
 {
-	public class Worker : BackgroundService
+	private readonly ILogger<Worker> _logger;
+
+	public Worker(ILogger<Worker> logger)
 	{
-		private readonly ILogger<Worker> _logger;
+		_logger = logger;
+	}
 
-		public Worker(ILogger<Worker> logger)
-		{
-			_logger = logger;
-		}
+	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+	{
+		var matchService = new MatchService();
+		var telegramService = new TelegramService();
 
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+		HashSet<int> sentMatches = new();
+
+		while (!stoppingToken.IsCancellationRequested)
 		{
-			var matchService = new MatchService();
-			var telegramService = new TelegramService();
-			await telegramService.SendMessage(
-		"🔥 GitHub Action Started"
-	);
 			try
 			{
 				Console.WriteLine("=================================");
 				Console.WriteLine($"Checking matches: {DateTime.Now}");
 
 				var matches = await matchService.GetMatchesAsync();
-				await telegramService.SendMessage(
-					$"? Bot checked website\nMatches Count: {matches.Count}\nTime: {DateTime.Now}"
-				);
+
 				Console.WriteLine($"Matches Count: {matches.Count}");
 
 				foreach (var match in matches)
@@ -39,34 +37,39 @@ namespace WorkerService1
 
 					if (isZamalek)
 					{
-						Console.WriteLine("?? Zamalek Match Found!");
+						Console.WriteLine("🔥 Zamalek Match Found!");
 
-						var msg =
-$"""
-?? Zamalek Match Found
+						if (!sentMatches.Contains(match.MatchId))
+						{
+							var msg =
+		$"""
+🚨 New Match Alert
 
-? {match.Team1Ar} vs {match.Team2Ar}
+⚽ {match.Team1Ar} vs {match.Team2Ar}
 
-?? Stadium: {match.Stadium}
+🏟 {match.Stadium}
 
-?? Kickoff: {match.KickOffTime}
+🕒 {match.KickOffTime}
 
-?? https://www.tazkarti.com/#/matches
+🔗 https://www.tazkarti.com/#/matches
 """;
 
-						await telegramService.SendMessage(msg);
+							await telegramService.SendMessage(msg);
 
-						Console.WriteLine("? Telegram Message Sent");
+							Console.WriteLine("✅ Telegram Message Sent");
+
+							sentMatches.Add(match.MatchId);
+						}
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"? ERROR: {ex.Message}");
+				Console.WriteLine($"❌ ERROR: {ex.Message}");
 			}
 
-			Console.WriteLine("Finished checking.");
-			Environment.Exit(0);
+			Console.WriteLine("⏳ Waiting 30 seconds...");
+			await Task.Delay(30000, stoppingToken);
 		}
 	}
 }
